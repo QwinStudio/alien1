@@ -2,100 +2,147 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>编码转换工具</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>外星语言编解码工具</title>
     <style>
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            max-width: 800px;
-            margin: 20px auto;
-            padding: 20px;
-            background: #f5f5f5;
+        :root {
+            --primary-color: #3498db;
+            --error-color: #e74c3c;
         }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 15px;
+            background: #f8f9fa;
+        }
+
         .container {
             background: white;
-            padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-radius: 12px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+            padding: 20px;
+            max-width: 600px;
+            margin: 0 auto;
         }
+
         h1 {
             color: #2c3e50;
+            font-size: 1.5rem;
             text-align: center;
-            margin-bottom: 30px;
+            margin: 0 0 1.5rem;
         }
+
         .converter-box {
-            display: grid;
-            grid-template-columns: 1fr auto 1fr;
-            gap: 20px;
-            align-items: center;
-        }
-        textarea {
-            width: 100%;
-            height: 150px;
-            padding: 12px;
-            border: 2px solid #3498db;
-            border-radius: 6px;
-            font-size: 14px;
-            resize: vertical;
-        }
-        button {
-            background: #3498db;
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background 0.3;
-        }
-        button:hover {
-            background: #2980b9;
-        }
-        .controls {
             display: flex;
             flex-direction: column;
             gap: 15px;
         }
-        .mode-selector {
-            text-align: center;
-            margin-bottom: 20px;
+
+        textarea {
+            width: 100%;
+            height: 120px;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            resize: vertical;
+            -webkit-appearance: none;
         }
+
+        textarea:focus {
+            border-color: var(--primary-color);
+            outline: none;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            flex-direction: column;
+        }
+
+        button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        button:active {
+            opacity: 0.8;
+        }
+
+        .mode-selector {
+            margin-bottom: 1rem;
+        }
+
+        .mode-selector button {
+            width: 100%;
+            background: #ecf5ff;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+        }
+
         .error {
-            color: #e74c3c;
-            margin-top: 10px;
-            padding: 10px;
+            color: var(--error-color);
+            margin: 10px 0;
+            padding: 12px;
             background: #f8d7da;
-            border-radius: 5px;
+            border-radius: 8px;
+            font-size: 14px;
             display: none;
         }
+
         .footer {
             text-align: center;
-            margin-top: 20px;
-            color: #7f8c8d;
+            color: #95a5a6;
+            font-size: 0.9rem;
+            margin-top: 1.5rem;
+            line-height: 1.4;
+        }
+        @media (min-width: 768px) {
+            body {
+                padding: 30px;
+            }
+            textarea {
+                height: 150px;
+            }
+            .controls {
+                flex-direction: row;
+                justify-content: center;
+            }
+            button {
+                padding: 12px 25px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>编码转换工具 🔄</h1>
+        <h1>外星语言编解码工具</h1>
         
         <div class="mode-selector">
             <button onclick="toggleDirection()">
-                当前模式：<span id="modeLabel">正常 → 乱码</span>
+                <span id="modeLabel">正常 → 乱码</span>
             </button>
         </div>
 
         <div class="converter-box">
             <div>
-                <h3>输入 📥</h3>
-                <textarea id="input" placeholder="在此输入需要转换的内容..."></textarea>
+                <textarea id="input" placeholder="输入内容..."></textarea>
             </div>
 
             <div class="controls">
-                <button onclick="convert()">转换 →</button>
-                <button onclick="swapText()">↔ 交换内容</button>
+                <button onclick="convert()">转换</button>
+                <button onclick="swapText()">交换</button>
             </div>
 
             <div>
-                <h3>输出 📤</h3>
                 <textarea id="output" readonly></textarea>
             </div>
         </div>
@@ -103,12 +150,13 @@
         <div id="errorBox" class="error"></div>
         
         <div class="footer">
-            <p>支持 UTF-8 ↔ ISO-8859-1 编码互转</p >
-            <p>遇到问题？尝试切换转换方向</p >
+            <p>支持中文乱码修复与生成<br>
+            长按文本可复制内容</p >
         </div>
     </div>
 
     <script>
+        // 保持原有JavaScript逻辑不变
         let isForward = true;
 
         function toggleDirection() {
@@ -127,18 +175,16 @@
             
             try {
                 if (isForward) {
-                    // 正向转换：正常 → 乱码
                     const encoder = new TextEncoder();
                     const decoder = new TextDecoder('iso-8859-1');
                     const bytes = encoder.encode(input);
                     output.value = decoder.decode(bytes);
                 } else {
-                    // 逆向转换：乱码 → 正常
                     const bytes = new Uint8Array(input.length);
                     for (let i = 0; i < input.length; i++) {
                         const code = input.codePointAt(i);
                         bytes[i] = code & 0xFF;
-                        if (code > 0xFFFF) i++; // 处理四字节字符
+                        if (code > 0xFFFF) i++;
                     }
                     
                     const decoder = new TextDecoder('utf-8', {
@@ -149,7 +195,7 @@
                     try {
                         output.value = decoder.decode(bytes);
                     } catch (e) {
-                        showError(`解码错误：位置 ${e.index} 发现无效字节`);
+                        showError(`解码错误：位置 ${e.index}`);
                         output.value = decoder.decode(bytes, { stream: true });
                     }
                 }
